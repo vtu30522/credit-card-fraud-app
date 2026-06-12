@@ -6,6 +6,8 @@ from db_operations import (
     delete_prediction
 )
 
+import os
+
 app = Flask(__name__)
 
 
@@ -19,13 +21,40 @@ def predict():
 
     if request.method == "POST":
 
-        time_value = request.form["Time"]
-        amount = request.form["Amount"]
+        time_value = float(request.form["Time"])
+        amount = float(request.form["Amount"])
 
-        # Temporary Dummy Prediction
-        prediction = "Normal Transaction"
-        confidence = "98.50%"
+        # -----------------------------
+        # RULE-BASED FRAUD LOGIC
+        # -----------------------------
+        score = 0
 
+        # Rule 1: Amount-based risk
+        if amount > 50000:
+            score += 2
+        elif amount > 20000:
+            score += 1
+
+        # Rule 2: Time-based risk
+        if time_value < 1000:
+            score += 1
+        elif time_value > 150000:
+            score += 2
+
+        # -----------------------------
+        # FINAL DECISION
+        # -----------------------------
+        if score >= 3:
+            prediction = "Fraud Transaction"
+            confidence = "91.25%"
+        elif score == 2:
+            prediction = "Suspicious Transaction"
+            confidence = "85.40%"
+        else:
+            prediction = "Normal Transaction"
+            confidence = "97.80%"
+
+        # Save to database
         insert_prediction(
             time_value,
             amount,
@@ -67,8 +96,6 @@ def delete(id):
 def about():
     return render_template("about.html")
 
-
-import os
 
 if __name__ == "__main__":
     app.run(
