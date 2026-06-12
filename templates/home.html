@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Credit Card Fraud Detection</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="fade-in">
+
+<nav class="navbar">
+
+    <h2>Fraud Detector</h2>
+
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/predict">Predict</a></li>
+        <li><a href="/history">History</a></li>
+        <li><a href="/about">About</a></li>
+    </ul>
+
+</nav>
+
+<div class="hero">
+
+    <h1>Credit Card Fraud Detection System</h1>
+
+    <p>
+        Detect fraudulent transactions using Machine Learning
+        and Artificial Intelligence.
+    </p>
+
+</div>
+
+<div class="cards">
+
+    <a href="/predict" class="card">
+
+        <h3>Predict Transaction</h3>
+
+        <p>
+            Check whether a transaction is fraud or normal.
+        </p>
+
+    </a>
+
+    <a href="/history" class="card">
+
+        <h3>Prediction History</h3>
+
+        <p>
+            View all previous prediction results.
+        </p>
+
+    </a>
+
+    <a href="/about" class="card">
+
+        <h3>About Project</h3>
+
+        <p>
+            Learn about the Fraud Detection System.
+        </p>
+
+    </a>
+
+</div>
+
+</body>
+</html>

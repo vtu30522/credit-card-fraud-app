@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction History</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="fade-in">
+
+<nav class="navbar">
+
+    <h2>Fraud Detector</h2>
+
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/predict">Predict</a></li>
+        <li><a href="/history">History</a></li>
+        <li><a href="/about">About</a></li>
+    </ul>
+
+</nav>
+
+<div class="table-container">
+
+    <h1 style="text-align:center; margin-bottom:20px;">
+        Prediction History
+    </h1>
+
+    <table>
+
+        <tr>
+            <th>ID</th>
+            <th>Time</th>
+            <th>Amount</th>
+            <th>Prediction</th>
+            <th>Confidence</th>
+            <th>Action</th>
+        </tr>
+
+        {% for row in records %}
+
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+
+            <td>
+                <a href="/delete/{{ row[0] }}">
+                    Delete
+                </a>
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediction Result</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="fade-in">
+
+<nav class="navbar">
+
+    <h2>Fraud Detector</h2>
+
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/predict">Predict</a></li>
+        <li><a href="/history">History</a></li>
+        <li><a href="/about">About</a></li>
+    </ul>
+
+</nav>
+
+<div class="container">
+
+    <h1>Prediction Result</h1>
+
+    <h3>Time : {{ time_value }}</h3>
+
+    <h3>Amount : {{ amount }}</h3>
+
+    <h3>Prediction : {{ prediction }}</h3>
+
+    <h3>Confidence : {{ confidence }}</h3>
+
+</div>
+
+</body>
+</html>
