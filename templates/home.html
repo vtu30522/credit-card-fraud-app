@@ -24,36 +24,49 @@
             </div>
         </div>
 
-        <div class="hero">
-            <h1>Smart Fraud Detection</h1>
-            <p>Detect fraudulent transactions in real-time using Machine Learning & Smart Analytics</p>
-            
-            <div class="hero-buttons">
-                <a href="/upload" class="btn-primary">🚀 Predict Now</a>
-                <a href="/history" class="btn-secondary">📊 View History</a>
+        <div class="dashboard-header">
+            <h2>Analytics Dashboard</h2>
+            <div class="header-actions">
+                <div class="badge">Insights</div>
+                <a href="/history" class="btn-secondary">View History</a>
             </div>
         </div>
 
         <div class="stats">
             <div class="stat-card">
+                <div class="stat-icon">📁</div>
+                <div class="stat-number">{{ total_files }}</div>
+                <div class="stat-label">Uploads Analyzed</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-icon">📊</div>
-                <div class="stat-number">1,248</div>
-                <div class="stat-label">Transactions Analyzed</div>
+                <div class="stat-number">{{ total_transactions }}</div>
+                <div class="stat-label">Transactions Processed</div>
             </div>
             <div class="stat-card">
                 <div class="stat-icon">🚨</div>
-                <div class="stat-number">312</div>
-                <div class="stat-label">Fraud Detected (This Week)</div>
+                <div class="stat-number">{{ total_fraud }}</div>
+                <div class="stat-label">Fraud Cases</div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">✅</div>
-                <div class="stat-number">92.4%</div>
-                <div class="stat-label">Detection Accuracy</div>
+                <div class="stat-icon">🔥</div>
+                <div class="stat-number">{{ fraud_rate }}%</div>
+                <div class="stat-label">Overall Fraud Rate</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">👥</div>
-                <div class="stat-number">856</div>
-                <div class="stat-label">Users Protected</div>
+        </div>
+
+        <div class="cards">
+            <div class="chart-card">
+                <h3>📉 Fraud Trend</h3>
+                <div class="chart-wrap">
+                    <canvas id="fraudTrendChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📦 Volume by Upload</h3>
+                <div class="chart-wrap">
+                    <canvas id="volumeChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -71,6 +84,73 @@
                 <p>Learn about our advanced ML model, technology stack, and security measures.</p>
             </a>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const labels = {{ chart_labels|tojson }};
+            const fraudValues = {{ fraud_values|tojson }};
+            const volumeValues = {{ volume_values|tojson }};
+
+            const ctx1 = document.getElementById('fraudTrendChart');
+            if (ctx1) {
+                new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Fraud Cases',
+                            data: fraudValues,
+                            borderColor: '#ec4899',
+                            backgroundColor: 'rgba(236,72,153,0.3)',
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ec4899',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#cbd5e1' } },
+                            y: { ticks: { color: '#cbd5e1' }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            const ctx2 = document.getElementById('volumeChart');
+            if (ctx2) {
+                new Chart(ctx2, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Transactions',
+                            data: volumeValues,
+                            backgroundColor: 'rgba(168,85,247,0.65)',
+                            borderColor: '#a855f7',
+                            borderWidth: 1,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#cbd5e1' } },
+                            y: { ticks: { color: '#cbd5e1' }, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        </script>
     </main>
 </body>
 </html>

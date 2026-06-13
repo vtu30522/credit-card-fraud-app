@@ -22,7 +22,29 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    records = get_all_history()
+    total_files = len(records)
+    total_transactions = sum(row[2] for row in records)
+    total_fraud = sum(row[3] for row in records)
+    total_normal = sum(row[4] for row in records)
+    fraud_rate = round((total_fraud / total_transactions) * 100, 2) if total_transactions else 0
+
+    recent = list(reversed(records[:7]))
+    chart_labels = [row[5].split(' ')[0] for row in recent]
+    fraud_values = [row[3] for row in recent]
+    volume_values = [row[2] for row in recent]
+
+    return render_template(
+        "home.html",
+        total_files=total_files,
+        total_transactions=total_transactions,
+        total_fraud=total_fraud,
+        total_normal=total_normal,
+        fraud_rate=fraud_rate,
+        chart_labels=chart_labels,
+        fraud_values=fraud_values,
+        volume_values=volume_values,
+    )
 
 
 @app.route("/upload")
