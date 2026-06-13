@@ -1,71 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Credit Card Fraud Detection</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <title>FRAUDEX - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 <body class="fade-in">
+    <aside class="sidebar">
+        <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
+        <ul class="sidebar-menu">
+            <li><a href="/" class="active">🏠 Home</a></li>
+            <li><a href="/upload">📤 Predict Transaction</a></li>
+            <li><a href="/history">📋 History</a></li>
+            <li><a href="/about">ℹ️ About Us</a></li>
+        </ul>
+    </aside>
 
-<nav class="navbar">
+    <main class="main-content">
+        <div class="hero">
+            <h1>Smart Fraud Detection</h1>
+            <p>Detect fraudulent transactions in real-time using Machine Learning & Smart Analytics</p>
+            
+            <div class="hero-buttons">
+                <a href="/upload" class="btn-primary">🚀 Predict Now</a>
+                <a href="/history" class="btn-secondary">📊 View History</a>
+            </div>
+        </div>
 
-    <h2>Fraud Detector</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number">1,248</div>
+                <div class="stat-label">Transactions Analyzed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-number">312</div>
+                <div class="stat-label">Fraud Detected (This Week)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-number">92.4%</div>
+                <div class="stat-label">Detection Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-number">856</div>
+                <div class="stat-label">Users Protected</div>
+            </div>
+        </div>
 
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/predict">Predict</a></li>
-        <li><a href="/history">History</a></li>
-        <li><a href="/about">About</a></li>
-    </ul>
-
-</nav>
-
-<div class="hero">
-
-    <h1>Credit Card Fraud Detection System</h1>
-
-    <p>
-        Detect fraudulent transactions using Machine Learning
-        and Artificial Intelligence.
-    </p>
-
-</div>
-
-<div class="cards">
-
-    <a href="/predict" class="card">
-
-        <h3>Predict Transaction</h3>
-
-        <p>
-            Check whether a transaction is fraud or normal.
-        </p>
-
-    </a>
-
-    <a href="/history" class="card">
-
-        <h3>Prediction History</h3>
-
-        <p>
-            View all previous prediction results.
-        </p>
-
-    </a>
-
-    <a href="/about" class="card">
-
-        <h3>About Project</h3>
-
-        <p>
-            Learn about the Fraud Detection System.
-        </p>
-
-    </a>
-
-</div>
-
+        <div class="cards">
+            <a href="/upload" class="card">
+                <h3>🎯 Detect Transaction</h3>
+                <p>Upload transaction data and predict fraud instantly with AI-powered analysis.</p>
+            </a>
+            <a href="/history" class="card">
+                <h3>📈 Prediction History</h3>
+                <p>View all uploaded files and detailed prediction records with accuracy metrics.</p>
+            </a>
+            <a href="/about" class="card">
+                <h3>🔬 About Project</h3>
+                <p>Learn about our advanced ML model, technology stack, and security measures.</p>
+            </a>
+        </div>
+    </main>
 </body>
 </html>

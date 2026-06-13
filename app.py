@@ -1,14 +1,22 @@
-from flask import Flask, render_template, request, redirect
-
-from db_operations import (
-    insert_prediction,
-    get_all_predictions,
-    delete_prediction
-)
-
+from flask import Flask, render_template, request
+import pandas as pd
+import joblib
 import os
 
+from db_operations import (
+    save_prediction_history,
+    get_all_history,
+    delete_history
+)
+
 app = Flask(__name__)
+
+model = joblib.load("final_model.pkl")
+
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 @app.route("/")
@@ -16,67 +24,62 @@ def home():
     return render_template("home.html")
 
 
-@app.route("/predict", methods=["GET", "POST"])
+@app.route("/upload")
+def upload():
+    return render_template("upload.html")
+
+
+@app.route("/predict", methods=["POST"])
 def predict():
 
-    if request.method == "POST":
+    file = request.files["file"]
 
-        time_value = float(request.form["Time"])
-        amount = float(request.form["Amount"])
+    if file.filename == "":
+        return "No file selected"
 
-        # -----------------------------
-        # RULE-BASED FRAUD LOGIC
-        # -----------------------------
-        score = 0
+    filepath = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        file.filename
+    )
 
-        # Rule 1: Amount-based risk
-        if amount > 50000:
-            score += 2
-        elif amount > 20000:
-            score += 1
+    file.save(filepath)
 
-        # Rule 2: Time-based risk
-        if time_value < 1000:
-            score += 1
-        elif time_value > 150000:
-            score += 2
+    df = pd.read_csv(filepath)
 
-        # -----------------------------
-        # FINAL DECISION
-        # -----------------------------
-        if score >= 3:
-            prediction = "Fraud Transaction"
-            confidence = "91.25%"
-        elif score == 2:
-            prediction = "Suspicious Transaction"
-            confidence = "85.40%"
-        else:
-            prediction = "Normal Transaction"
-            confidence = "97.80%"
+    predictions = model.predict(df)
 
-        # Save to database
-        insert_prediction(
-            time_value,
-            amount,
-            prediction,
-            confidence
-        )
+    fraud_count = int(sum(predictions))
 
-        return render_template(
-            "result.html",
-            prediction=prediction,
-            confidence=confidence,
-            time_value=time_value,
-            amount=amount
-        )
+    total = len(predictions)
 
-    return render_template("predict.html")
+    normal_count = total - fraud_count
+
+    fraud_percentage = round(
+        (fraud_count / total) * 100,
+        2
+    )
+
+    save_prediction_history(
+        file.filename,
+        total,
+        fraud_count,
+        normal_count
+    )
+
+    return render_template(
+        "result.html",
+        filename=file.filename,
+        total=total,
+        fraud=fraud_count,
+        normal=normal_count,
+        percentage=fraud_percentage
+    )
 
 
 @app.route("/history")
 def history():
 
-    records = get_all_predictions()
+    records = get_all_history()
 
     return render_template(
         "history.html",
@@ -87,9 +90,14 @@ def history():
 @app.route("/delete/<int:id>")
 def delete(id):
 
-    delete_prediction(id)
+    delete_history(id)
 
-    return redirect("/history")
+    records = get_all_history()
+
+    return render_template(
+        "history.html",
+        records=records
+    )
 
 
 @app.route("/about")
@@ -98,7 +106,4 @@ def about():
 
 
 if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000))
-    )
+    app.run(debug=True)

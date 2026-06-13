@@ -1,46 +1,46 @@
 import sqlite3
 
 
-def insert_prediction(
-    time_value,
-    amount,
-    prediction,
-    confidence
+def save_prediction_history(
+    filename,
+    total_transactions,
+    fraud_count,
+    normal_count
 ):
-
     conn = sqlite3.connect("fraud.db")
 
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO fraud_predictions
+    INSERT INTO prediction_history
     (
-        time_value,
-        amount,
-        prediction,
-        confidence
+        filename,
+        total_transactions,
+        fraud_count,
+        normal_count
     )
     VALUES (?, ?, ?, ?)
     """,
     (
-        time_value,
-        amount,
-        prediction,
-        confidence
+        filename,
+        total_transactions,
+        fraud_count,
+        normal_count
     ))
 
     conn.commit()
     conn.close()
 
 
-def get_all_predictions():
+def get_all_history():
 
     conn = sqlite3.connect("fraud.db")
 
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT * FROM fraud_predictions
+    SELECT * FROM prediction_history
+    ORDER BY id DESC
     """)
 
     records = cursor.fetchall()
@@ -50,15 +50,15 @@ def get_all_predictions():
     return records
 
 
-def delete_prediction(id):
+def delete_history(record_id):
 
     conn = sqlite3.connect("fraud.db")
 
     cursor = conn.cursor()
 
     cursor.execute(
-        "DELETE FROM fraud_predictions WHERE id=?",
-        (id,)
+        "DELETE FROM prediction_history WHERE id=?",
+        (record_id,)
     )
 
     conn.commit()

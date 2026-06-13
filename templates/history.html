@@ -1,65 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Prediction History</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <title>FRAUDEX - History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
 <body class="fade-in">
+    <aside class="sidebar">
+        <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
+        <ul class="sidebar-menu">
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/upload">📤 Predict Transaction</a></li>
+            <li><a href="/history" class="active">📋 History</a></li>
+            <li><a href="/about">ℹ️ About Us</a></li>
+        </ul>
+    </aside>
 
-<nav class="navbar">
+    <main class="main-content">
+        <div class="container">
+            <h1>📊 Prediction History</h1>
+            
+            {% if records %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>📁 File</th>
+                            <th>📈 Total</th>
+                            <th>🚨 Fraud</th>
+                            <th>✅ Normal</th>
+                            <th>📅 Date</th>
+                            <th>🗑️ Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in records %}
+                        <tr>
+                            <td>{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                            <td>{{ row[3] }}</td>
+                            <td>{{ row[4] }}</td>
+                            <td>{{ row[5] }}</td>
+                            <td>
+                                <a href="/delete/{{ row[0] }}" class="delete-btn">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="result-box">
+                <p style="font-size: 18px; color: #cbd5e1;">No prediction history yet. <a href="/upload" style="color: #ec4899;">Start detecting fraud!</a></p>
+            </div>
+            {% endif %}
 
-    <h2>Fraud Detector</h2>
-
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/predict">Predict</a></li>
-        <li><a href="/history">History</a></li>
-        <li><a href="/about">About</a></li>
-    </ul>
-
-</nav>
-
-<div class="table-container">
-
-    <h1 style="text-align:center; margin-bottom:20px;">
-        Prediction History
-    </h1>
-
-    <table>
-
-        <tr>
-            <th>ID</th>
-            <th>Time</th>
-            <th>Amount</th>
-            <th>Prediction</th>
-            <th>Confidence</th>
-            <th>Action</th>
-        </tr>
-
-        {% for row in records %}
-
-        <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td>{{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
-
-            <td>
-                <a href="/delete/{{ row[0] }}">
-                    Delete
-                </a>
-            </td>
-        </tr>
-
-        {% endfor %}
-
-    </table>
-
-</div>
-
+            <div style="margin-top: 30px; text-align: center;">
+                <a href="/" class="btn-secondary">← Back to Home</a>
+            </div>
+        </div>
+    </main>
 </body>
 </html>
