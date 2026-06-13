@@ -49,6 +49,12 @@ def predict():
 
         predictions = model.predict(df)
 
+        # compute probabilities for class 1 (fraud)
+        try:
+            probs = model.predict_proba(df)[:, 1]
+        except Exception:
+            probs = None
+
         fraud_count = int(sum(predictions))
 
         total = len(predictions)
@@ -59,6 +65,14 @@ def predict():
             (fraud_count / total) * 100,
             2
         )
+
+        # aggregate confidence metrics
+        if probs is not None:
+            avg_confidence = round(float(probs.mean()) * 100, 2)
+            max_confidence = round(float(probs.max()) * 100, 2)
+        else:
+            avg_confidence = None
+            max_confidence = None
 
         save_prediction_history(
             file.filename,
@@ -73,7 +87,9 @@ def predict():
             total=total,
             fraud=fraud_count,
             normal=normal_count,
-            percentage=fraud_percentage
+            percentage=fraud_percentage,
+            avg_confidence=avg_confidence,
+            max_confidence=max_confidence,
         )
     except Exception:
         import traceback

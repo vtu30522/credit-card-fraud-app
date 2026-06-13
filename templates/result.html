@@ -37,6 +37,18 @@
                     <div class="stat-number">{{ normal }}</div>
                     <div class="stat-label">Normal Transactions</div>
                 </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-number">{% if avg_confidence is not none %}{{ avg_confidence }}%{% else %}-{% endif %}</div>
+                    <div class="stat-label">Avg Fraud Confidence</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-number">{% if max_confidence is not none %}{{ max_confidence }}%{% else %}-{% endif %}</div>
+                    <div class="stat-label">Max Fraud Confidence</div>
+                </div>
             </div>
 
             <div class="result-box">
