@@ -8,6 +8,7 @@ from db_operations import (
     get_all_history,
     delete_history
 )
+import database
 
 app = Flask(__name__)
 
@@ -31,49 +32,53 @@ def upload():
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    try:
+        file = request.files["file"]
 
-    file = request.files["file"]
+        if file.filename == "":
+            return "No file selected"
 
-    if file.filename == "":
-        return "No file selected"
+        filepath = os.path.join(
+            app.config["UPLOAD_FOLDER"],
+            file.filename
+        )
 
-    filepath = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        file.filename
-    )
+        file.save(filepath)
 
-    file.save(filepath)
+        df = pd.read_csv(filepath)
 
-    df = pd.read_csv(filepath)
+        predictions = model.predict(df)
 
-    predictions = model.predict(df)
+        fraud_count = int(sum(predictions))
 
-    fraud_count = int(sum(predictions))
+        total = len(predictions)
 
-    total = len(predictions)
+        normal_count = total - fraud_count
 
-    normal_count = total - fraud_count
+        fraud_percentage = round(
+            (fraud_count / total) * 100,
+            2
+        )
 
-    fraud_percentage = round(
-        (fraud_count / total) * 100,
-        2
-    )
+        save_prediction_history(
+            file.filename,
+            total,
+            fraud_count,
+            normal_count
+        )
 
-    save_prediction_history(
-        file.filename,
-        total,
-        fraud_count,
-        normal_count
-    )
-
-    return render_template(
-        "result.html",
-        filename=file.filename,
-        total=total,
-        fraud=fraud_count,
-        normal=normal_count,
-        percentage=fraud_percentage
-    )
+        return render_template(
+            "result.html",
+            filename=file.filename,
+            total=total,
+            fraud=fraud_count,
+            normal=normal_count,
+            percentage=fraud_percentage
+        )
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        return "Internal server error", 500
 
 
 @app.route("/history")
