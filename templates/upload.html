@@ -19,16 +19,35 @@
         <div class="container">
             <h1>🚀 Detect Transaction Fraud</h1>
 
-            <form action="/predict" method="POST" enctype="multipart/form-data">
-                <label for="file">📁 Select CSV File:</label>
-                <input type="file"
-                       id="file"
-                       name="file"
-                       accept=".csv"
-                       required>
+            <div class="cards">
+                <div class="card">
+                    <h3>📁 Prediction Panel</h3>
+                    <p class="card">Upload a CSV with transaction features matching the model and run predictions.</p>
+                    <form action="/predict" method="POST" enctype="multipart/form-data">
+                        <label for="file">Select CSV File</label>
+                        <input type="file" id="file" name="file" accept=".csv" required>
+                        <button type="submit" class="btn-primary">⚡ Upload & Predict</button>
+                    </form>
+                </div>
 
-                <button type="submit">⚡ Upload & Predict</button>
-            </form>
+                <div class="card">
+                    <h3>📊 Result Preview</h3>
+                    <div class="result-box">
+                        <h2>No Prediction Yet</h2>
+                        <p style="color:#cbd5e1;">Upload a file to see average and max fraud confidence here.</p>
+                        <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;">
+                            <div style="text-align:center;">
+                                <div class="stat-number">-</div>
+                                <div class="stat-label">Avg Confidence</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div class="stat-number">-</div>
+                                <div class="stat-label">Max Confidence</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </body>
