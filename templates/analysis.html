@@ -8,14 +8,14 @@
     <aside class="sidebar">
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
-            <li><a href="/">🏠 Home</a></li>
-            <li><a href="/upload">📤 Predict</a></li>
-            <li><a href="/history">📋 History</a></li>
-            <li><a href="/analysis" class="active">📊 Analysis</a></li>
-            <li><a href="/about">ℹ️ About</a></li>
+            <li><a href="{{ url_for('home') }}">🏠 Home</a></li>
+            <li><a href="{{ url_for('upload') }}">📤 Predict</a></li>
+            <li><a href="{{ url_for('history') }}">📋 History</a></li>
+            <li><a href="{{ url_for('analysis') }}" class="active">📊 Analysis</a></li>
+            <li><a href="{{ url_for('about') }}">ℹ️ About</a></li>
         </ul>
         <div class="sidebar-footer">
-            <a href="/logout" class="sidebar-link">Logout</a>
+            <a href="{{ url_for('logout') }}" class="sidebar-link">Logout</a>
         </div>
     </aside>
 
@@ -37,7 +37,7 @@
         <div class="dashboard-header">
             <h2>Insight Summary</h2>
             <div class="header-actions">
-                <a href="/upload" class="btn-primary">New Prediction</a>
+                <a href="{{ url_for('upload') }}" class="btn-primary">New Prediction</a>
             </div>
         </div>
 

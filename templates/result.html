@@ -8,14 +8,14 @@
     <aside class="sidebar">
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
-            <li><a href="/">🏠 Home</a></li>
-            <li><a href="/upload" class="active">📤 Predict</a></li>
-            <li><a href="/history">📋 History</a></li>
-            <li><a href="/analysis">📊 Analysis</a></li>
-            <li><a href="/about">ℹ️ About</a></li>
+            <li><a href="{{ url_for('home') }}">🏠 Home</a></li>
+            <li><a href="{{ url_for('upload') }}" class="active">📤 Predict</a></li>
+            <li><a href="{{ url_for('history') }}">📋 History</a></li>
+            <li><a href="{{ url_for('analysis') }}">📊 Analysis</a></li>
+            <li><a href="{{ url_for('about') }}">ℹ️ About</a></li>
         </ul>
         <div class="sidebar-footer">
-            <a href="/logout" class="sidebar-link">Logout</a>
+            <a href="{{ url_for('logout') }}" class="sidebar-link">Logout</a>
         </div>
     </aside>
 
@@ -38,8 +38,8 @@
             <div class="dashboard-header">
                 <h2>Result Summary</h2>
                 <div class="header-actions">
-                    <a href="/upload" class="btn-secondary">Analyze Another</a>
-                    <a href="/download-report" class="btn-primary">Download Report</a>
+                    <a href="{{ url_for('upload') }}" class="btn-secondary">Analyze Another</a>
+                    <a href="{{ url_for('download_report') }}" class="btn-primary">Download Report</a>
                 </div>
             </div>
 
@@ -102,8 +102,8 @@
             {% endif %}
 
             <div class="button-row">
-                <a href="/upload" class="btn-primary">Upload Another CSV</a>
-                <a href="/history" class="btn-secondary">View History</a>
+                <a href="{{ url_for('upload') }}" class="btn-primary">Upload Another CSV</a>
+                <a href="{{ url_for('history') }}" class="btn-secondary">View History</a>
             </div>
         </div>
         <script src="{{ url_for('static', filename='js/ui.js') }}"></script>

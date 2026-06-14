@@ -8,14 +8,14 @@
     <aside class="sidebar">
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
-            <li><a href="/">🏠 Home</a></li>
-            <li><a href="/upload">📤 Predict</a></li>
-            <li><a href="/history" class="active">📋 History</a></li>
-            <li><a href="/analysis">📊 Analysis</a></li>
-            <li><a href="/about">ℹ️ About</a></li>
+            <li><a href="{{ url_for('home') }}">🏠 Home</a></li>
+            <li><a href="{{ url_for('upload') }}">📤 Predict</a></li>
+            <li><a href="{{ url_for('history') }}" class="active">📋 History</a></li>
+            <li><a href="{{ url_for('analysis') }}">📊 Analysis</a></li>
+            <li><a href="{{ url_for('about') }}">ℹ️ About</a></li>
         </ul>
         <div class="sidebar-footer">
-            <a href="/logout" class="sidebar-link">Logout</a>
+            <a href="{{ url_for('logout') }}" class="sidebar-link">Logout</a>
         </div>
     </aside>
 
@@ -38,7 +38,7 @@
             <div class="dashboard-header">
                 <h2>My Records</h2>
                 <div class="header-actions">
-                    <a href="/upload" class="btn-primary">New Prediction</a>
+                    <a href="{{ url_for('upload') }}" class="btn-primary">New Prediction</a>
                 </div>
             </div>
 
@@ -62,8 +62,8 @@
                 <p>Fraud percentage: <strong>{{ selected_record['fraud_percentage'] }}%</strong></p>
                 <p>Prediction date: <strong>{{ selected_record['prediction_date'] }}</strong></p>
                 <div class="button-row" style="justify-content:flex-start; gap:14px; margin-top:18px;">
-                    <a href="/download-history-report/{{ selected_record['id'] }}" class="btn-primary">Download History Report</a>
-                    <a href="/history" class="btn-secondary">Close Details</a>
+                    <a href="{{ url_for('download_history_report', record_id=selected_record['id']) }}" class="btn-primary">Download History Report</a>
+                    <a href="{{ url_for('history') }}" class="btn-secondary">Close Details</a>
                 </div>
             </div>
             {% endif %}
@@ -94,9 +94,9 @@
                             <td>{{ row['fraud_percentage'] }}%</td>
                             <td>{{ row['prediction_date'] }}</td>
                             <td>
-                                <a href="/history/{{ row['id'] }}" class="btn-secondary" style="margin-right: 8px;">Details</a>
-                                <a href="/download-history-report/{{ row['id'] }}" class="btn-secondary">Download</a>
-                                <a href="/delete/{{ row['id'] }}" class="delete-btn">Delete</a>
+                                <a href="{{ url_for('history', record_id=row['id']) }}" class="btn-secondary" style="margin-right: 8px;">Details</a>
+                                <a href="{{ url_for('download_history_report', record_id=row['id']) }}" class="btn-secondary">Download</a>
+                                <a href="{{ url_for('delete', record_id=row['id']) }}" class="delete-btn">Delete</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -107,12 +107,12 @@
             <div class="result-box">
                 <h3>No History Yet</h3>
                 <p>Upload a CSV transaction file to start tracking fraud detection history.</p>
-                <a href="/upload" class="btn-primary">Start Predicting</a>
+                <a href="{{ url_for('upload') }}" class="btn-primary">Start Predicting</a>
             </div>
             {% endif %}
 
             <div class="button-row" style="justify-content:center; margin-top: 24px;">
-                <a href="/analysis" class="btn-secondary">View Analytics</a>
+                <a href="{{ url_for('analysis') }}" class="btn-secondary">View Analytics</a>
             </div>
         </div>
         <script src="{{ url_for('static', filename='js/ui.js') }}"></script>

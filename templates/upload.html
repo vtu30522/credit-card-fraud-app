@@ -8,14 +8,14 @@
     <aside class="sidebar">
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
-            <li><a href="/">🏠 Home</a></li>
-            <li><a href="/upload" class="active">📤 Predict</a></li>
-            <li><a href="/history">📋 History</a></li>
-            <li><a href="/analysis">📊 Analysis</a></li>
-            <li><a href="/about">ℹ️ About</a></li>
+            <li><a href="{{ url_for('home') }}">🏠 Home</a></li>
+            <li><a href="{{ url_for('upload') }}" class="active">📤 Predict</a></li>
+            <li><a href="{{ url_for('history') }}">📋 History</a></li>
+            <li><a href="{{ url_for('analysis') }}">📊 Analysis</a></li>
+            <li><a href="{{ url_for('about') }}">ℹ️ About</a></li>
         </ul>
         <div class="sidebar-footer">
-            <a href="/logout" class="sidebar-link">Logout</a>
+            <a href="{{ url_for('logout') }}" class="sidebar-link">Logout</a>
         </div>
     </aside>
 
@@ -39,7 +39,7 @@
                 <h2>Upload & Predict</h2>
                 <div class="header-actions">
                     <div class="badge">Secure</div>
-                    <a href="/history" class="btn-secondary">History</a>
+                    <a href="{{ url_for('history') }}" class="btn-secondary">History</a>
                 </div>
             </div>
 
@@ -57,7 +57,7 @@
                 <div class="card card-large">
                     <h3>Upload CSV File</h3>
                     <p>Required columns: Time, V1…V28, Amount.</p>
-                    <form action="/predict" method="POST" enctype="multipart/form-data">
+                    <form action="{{ url_for('predict') }}" method="POST" enctype="multipart/form-data">
                         <label for="file">Select CSV File</label>
                         <input type="file" id="file" name="file" accept=".csv" required>
                         <button type="submit" class="btn-primary">⚡ Upload & Predict</button>
@@ -76,8 +76,8 @@
             </div>
 
             <div class="button-row" style="justify-content:space-between; margin-top: 10px;">
-                <a href="/download-sample" class="btn-secondary">Download Sample CSV</a>
-                <a href="/history" class="btn-secondary">View History</a>
+                <a href="{{ url_for('download_sample') }}" class="btn-secondary">Download Sample CSV</a>
+                <a href="{{ url_for('history') }}" class="btn-secondary">View History</a>
             </div>
         </div>
         <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
