@@ -9,48 +9,76 @@
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
             <li><a href="/">🏠 Home</a></li>
-            <li><a href="/upload">📤 Predict Transaction</a></li>
+            <li><a href="/upload">📤 Predict</a></li>
             <li><a href="/history" class="active">📋 History</a></li>
-            <li><a href="/about">ℹ️ About Us</a></li>
+            <li><a href="/analysis">📊 Analysis</a></li>
+            <li><a href="/about">ℹ️ About</a></li>
         </ul>
+        <div class="sidebar-footer">
+            <a href="/logout" class="sidebar-link">Logout</a>
+        </div>
     </aside>
 
     <main class="main-content">
+        <div class="page-header">
+            <div class="page-info">
+                <h1>Prediction History</h1>
+                <p>Review all your uploaded files with fraud counts, fraud percentage, and timestamps.</p>
+            </div>
+            <div class="page-actions">
+                <div class="profile-card">
+                    <div class="profile-icon">👤</div>
+                    <div><strong>{{ session['username'] }}</strong><span>Signed in</span></div>
+                </div>
+                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+            </div>
+        </div>
+
         <div class="container">
             <div class="dashboard-header">
-                <h2>Prediction History</h2>
+                <h2>My Records</h2>
                 <div class="header-actions">
                     <a href="/upload" class="btn-primary">New Prediction</a>
                 </div>
             </div>
 
-            <h1>📊 Prediction History</h1>
-            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="alerts">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
             {% if records %}
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>📁 File</th>
-                            <th>📈 Total</th>
-                            <th>🚨 Fraud</th>
-                            <th>✅ Normal</th>
-                            <th>📅 Date</th>
-                            <th>🗑️ Action</th>
+                            <th>Filename</th>
+                            <th>Total</th>
+                            <th>Fraud</th>
+                            <th>Normal</th>
+                            <th>Fraud %</th>
+                            <th>Date</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in records %}
                         <tr>
-                            <td>{{ row[0] }}</td>
-                            <td>{{ row[1] }}</td>
-                            <td>{{ row[2] }}</td>
-                            <td>{{ row[3] }}</td>
-                            <td>{{ row[4] }}</td>
-                            <td>{{ row[5] }}</td>
+                            <td>{{ row['id'] }}</td>
+                            <td>{{ row['filename'] }}</td>
+                            <td>{{ row['total_transactions'] }}</td>
+                            <td>{{ row['fraud_count'] }}</td>
+                            <td>{{ row['normal_count'] }}</td>
+                            <td>{{ row['fraud_percentage'] }}%</td>
+                            <td>{{ row['prediction_date'] }}</td>
                             <td>
-                                <a href="/delete/{{ row[0] }}" class="delete-btn">Delete</a>
+                                <a href="/delete/{{ row['id'] }}" class="delete-btn">Delete</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -59,14 +87,17 @@
             </div>
             {% else %}
             <div class="result-box">
-                <p style="font-size: 18px; color: #cbd5e1;">No prediction history yet. <a href="/upload" style="color: #ec4899;">Start detecting fraud!</a></p>
+                <h3>No History Yet</h3>
+                <p>Upload a CSV transaction file to start tracking fraud detection history.</p>
+                <a href="/upload" class="btn-primary">Start Predicting</a>
             </div>
             {% endif %}
 
-            <div style="margin-top: 30px; text-align: center;">
-                <a href="/" class="btn-secondary">← Back to Home</a>
+            <div class="button-row" style="justify-content:center; margin-top: 24px;">
+                <a href="/analysis" class="btn-secondary">View Analytics</a>
             </div>
         </div>
+        <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
     </main>
 </body>
 </html>

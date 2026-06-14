@@ -9,22 +9,38 @@
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
             <li><a href="/">🏠 Home</a></li>
-            <li><a href="/upload" class="active">📤 Predict Transaction</a></li>
+            <li><a href="/upload" class="active">📤 Predict</a></li>
             <li><a href="/history">📋 History</a></li>
-            <li><a href="/about">ℹ️ About Us</a></li>
+            <li><a href="/analysis">📊 Analysis</a></li>
+            <li><a href="/about">ℹ️ About</a></li>
         </ul>
+        <div class="sidebar-footer">
+            <a href="/logout" class="sidebar-link">Logout</a>
+        </div>
     </aside>
 
     <main class="main-content">
+        <div class="page-header">
+            <div class="page-info">
+                <h1>Prediction Result</h1>
+                <p>Your analysis is complete and saved to your secure history.</p>
+            </div>
+            <div class="page-actions">
+                <div class="profile-card">
+                    <div class="profile-icon">👤</div>
+                    <div><strong>{{ session['username'] }}</strong><span>Signed in</span></div>
+                </div>
+                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+            </div>
+        </div>
+
         <div class="container">
             <div class="dashboard-header">
-                <h2>Prediction Result</h2>
+                <h2>Result Summary</h2>
                 <div class="header-actions">
                     <a href="/upload" class="btn-secondary">Analyze Another</a>
                 </div>
             </div>
-
-            <h1>✅ Prediction Result</h1>
 
             <div class="stats">
                 <div class="stat-card">
@@ -32,51 +48,64 @@
                     <div class="stat-number">{{ total }}</div>
                     <div class="stat-label">Total Transactions</div>
                 </div>
-
                 <div class="stat-card">
                     <div class="stat-icon">🚨</div>
                     <div class="stat-number">{{ fraud }}</div>
-                    <div class="stat-label">Fraud Detected</div>
+                    <div class="stat-label">Fraud Transactions</div>
                 </div>
-
                 <div class="stat-card">
                     <div class="stat-icon">✅</div>
                     <div class="stat-number">{{ normal }}</div>
                     <div class="stat-label">Normal Transactions</div>
                 </div>
-
                 <div class="stat-card">
-                    <div class="stat-icon">🎯</div>
-                    <div class="stat-number">{% if avg_confidence is not none %}{{ avg_confidence }}%{% else %}-{% endif %}</div>
-                    <div class="stat-label">Avg Fraud Confidence</div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-icon">📈</div>
-                    <div class="stat-number">{% if max_confidence is not none %}{{ max_confidence }}%{% else %}-{% endif %}</div>
-                    <div class="stat-label">Max Fraud Confidence</div>
+                    <div class="stat-icon">🔥</div>
+                    <div class="stat-number">{{ percentage }}%</div>
+                    <div class="stat-label">Fraud Percentage</div>
                 </div>
             </div>
 
-            <div class="result-box">
-                <h2>🎯 Fraud Detection Rate</h2>
-                <div class="result-status fraud-status">{{ percentage }}%</div>
-                <p style="color: #cbd5e1; margin-top: 15px;">
-                    {% if percentage > 10 %}
-                    ⚠️ High fraud rate detected - Review transactions carefully
-                    {% elif percentage > 5 %}
-                    ⚡ Moderate fraud rate - Additional verification recommended
-                    {% else %}
-                    ✅ Low fraud rate - Transactions appear secure
-                    {% endif %}
-                </p>
+            {% if has_fraud %}
+            <div class="container" style="margin-top: 20px; padding: 24px; background: rgba(20,28,55,0.9);">
+                <h3>Fraud Transaction Details</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transaction #</th>
+                                <th>Time</th>
+                                <th>Amount</th>
+                                <th>Prediction</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tx in fraud_transactions %}
+                            <tr>
+                                <td>{{ tx.transaction_number }}</td>
+                                <td>{{ tx.time }}</td>
+                                <td>{{ tx.amount }}</td>
+                                <td>{{ tx.prediction }}</td>
+                                <td>{{ tx.confidence }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+            {% else %}
+            <div class="result-box" style="margin-top: 20px;">
+                <h3>No Fraud Transactions Detected</h3>
+                <p>All transactions in this file appear normal.</p>
+            </div>
+            {% endif %}
 
-            <div style="margin-top: 30px; display: flex; gap: 20px; justify-content: center;">
-                <a href="/upload" class="btn-primary">📤 Analyze Another File</a>
-                <a href="/history" class="btn-secondary">📊 View History</a>
+            <div class="button-row">
+                <a href="/upload" class="btn-primary">Upload Another CSV</a>
+                <a href="/history" class="btn-secondary">View History</a>
             </div>
         </div>
+        <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
     </main>
 </body>
 </html>

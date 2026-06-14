@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FRAUDEX - Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="fade-in">
+    <aside class="sidebar">
+        <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
+        <ul class="sidebar-menu">
+            <li><a href="/">🏠 Home</a></li>
+            <li><a href="/upload">📤 Predict</a></li>
+            <li><a href="/history">📋 History</a></li>
+            <li><a href="/analysis" class="active">📊 Analysis</a></li>
+            <li><a href="/about">ℹ️ About</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="/logout" class="sidebar-link">Logout</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <div class="page-info">
+                <h1>Analysis Dashboard</h1>
+                <p>Visualize your fraud detection performance and transaction trends.</p>
+            </div>
+            <div class="page-actions">
+                <div class="profile-card">
+                    <div class="profile-icon">👤</div>
+                    <div><strong>{{ session['username'] }}</strong><span>Signed in</span></div>
+                </div>
+                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+            </div>
+        </div>
+
+        <div class="dashboard-header">
+            <h2>Insight Summary</h2>
+            <div class="header-actions">
+                <a href="/upload" class="btn-primary">New Prediction</a>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-icon">📁</div>
+                <div class="stat-number">{{ total_files }}</div>
+                <div class="stat-label">Uploaded Files</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-number">{{ total_transactions }}</div>
+                <div class="stat-label">Transactions Processed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-number">{{ total_fraud }}</div>
+                <div class="stat-label">Fraud Detected</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-number">{{ average_fraud_rate }}%</div>
+                <div class="stat-label">Avg Fraud Rate</div>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="chart-card">
+                <h3>📊 Fraud vs Normal</h3>
+                <div class="chart-wrap">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📈 Recent Session Counts</h3>
+                <div class="chart-wrap">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Prediction Statistics</h3>
+                <p>Total files analyzed, transaction volume, fraud counts and average detection rate are displayed for your account.</p>
+            </div>
+            <div class="card">
+                <h3>Security Focus</h3>
+                <p>Every prediction is tied to your user account and stored securely in SQLite history.</p>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{{ url_for('static', filename='js/chart-helper.js') }}"></script>
+        <script>
+            const chartLabels = {{ chart_labels|tojson }};
+            const fraudValues = {{ fraud_values|tojson }};
+            const normalValues = {{ normal_values|tojson }};
+            const fraudVsNormal = {{ fraud_vs_normal|tojson }};
+
+            createDoughnutChart('pieChart', ['Fraud', 'Normal'], fraudVsNormal, ['#ec4899', '#2563eb']);
+
+            createChart('barChart', 'bar', {
+                labels: chartLabels,
+                datasets: [
+                    {
+                        label: 'Fraud Count',
+                        data: fraudValues,
+                        backgroundColor: '#ec4899',
+                        borderColor: '#ec4899',
+                        borderWidth: 1,
+                    },
+                    {
+                        label: 'Normal Count',
+                        data: normalValues,
+                        backgroundColor: '#2563eb',
+                        borderColor: '#2563eb',
+                        borderWidth: 1,
+                    }
+                ]
+            }, {
+                plugins: {
+                    legend: {
+                        labels: { color: '#cbd5e1' }
+                    }
+                }
+            });
+        </script>
+        <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
+    </main>
+</body>
+</html>

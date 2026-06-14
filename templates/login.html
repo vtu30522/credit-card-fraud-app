@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FRAUDEX - Sign In</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page fade-in">
+    <main class="main-content">
+        <div class="auth-wrapper">
+            <section class="auth-card">
+                <div class="auth-header">
+                    <span class="auth-badge">Secure Access</span>
+                    <h1>Sign in to FRAUDEX</h1>
+                    <p>Securely access your fraud detection dashboard, upload insights, and view private prediction history.</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="alerts">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <form class="auth-form" action="{{ url_for('login') }}" method="POST">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="email" placeholder="you@example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Sign In</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="{{ url_for('register') }}">Create one</a></p>
+                </div>
+            </section>
+
+            <aside class="auth-panel">
+                <h2>Premium fraud intelligence</h2>
+                <p>Gain instant and secure insight into your uploaded transactions with enterprise-grade protection and personalized analytics.</p>
+
+                <div class="auth-feature">
+                    <span class="auth-feature-icon">🔒</span>
+                    <div>
+                        <strong>Encrypted login</strong>
+                        <p>Passwords are hashed securely with Werkzeug for safe access.</p>
+                    </div>
+                </div>
+                <div class="auth-feature">
+                    <span class="auth-feature-icon">⚡</span>
+                    <div>
+                        <strong>Faster predictions</strong>
+                        <p>Upload CSV files and receive fraud analysis in seconds.</p>
+                    </div>
+                </div>
+                <div class="auth-feature">
+                    <span class="auth-feature-icon">📁</span>
+                    <div>
+                        <strong>History tracking</strong>
+                        <p>Keep all your prediction uploads, fraud counts, and analytics in one secure place.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

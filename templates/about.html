@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>FRAUDEX - About Us</title>
+    <title>FRAUDEX - About</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="fade-in">
@@ -9,64 +9,70 @@
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
             <li><a href="/">🏠 Home</a></li>
-            <li><a href="/upload">📤 Predict Transaction</a></li>
+            <li><a href="/upload">📤 Predict</a></li>
             <li><a href="/history">📋 History</a></li>
-            <li><a href="/about" class="active">ℹ️ About Us</a></li>
+            <li><a href="/analysis">📊 Analysis</a></li>
+            <li><a href="/about" class="active">ℹ️ About</a></li>
         </ul>
+        <div class="sidebar-footer">
+            <a href="/logout" class="sidebar-link">Logout</a>
+        </div>
     </aside>
 
     <main class="main-content">
+        <div class="page-header">
+            <div class="page-info">
+                <h1>About FRAUDEX</h1>
+                <p>Learn how FRAUDEX combines machine learning, security, and analytics for fraud prevention.</p>
+            </div>
+            <div class="page-actions">
+                <div class="profile-card">
+                    <div class="profile-icon">👤</div>
+                    <div><strong>{{ session['username'] }}</strong><span>Signed in</span></div>
+                </div>
+                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+            </div>
+        </div>
+
         <div class="container">
-            <h1>🔬 About FRAUDEX</h1>
-
-            <div style="margin-top: 30px; line-height: 1.8; color: #cbd5e1;">
-                <h2 style="color: #ec4899; margin: 25px 0 15px 0;">🎯 Project Overview</h2>
-                <p>
-                    FRAUDEX is an advanced Credit Card Fraud Detection System powered by Machine Learning 
-                    and Artificial Intelligence. It detects fraudulent transactions in real-time with high accuracy 
-                    to protect financial institutions and cardholders.
-                </p>
-
-                <h2 style="color: #ec4899; margin: 25px 0 15px 0;">🛠️ Technology Stack</h2>
-                <ul style="margin-left: 20px;">
-                    <li>🐍 <strong>Backend:</strong> Python with Flask Web Framework</li>
-                    <li>🎨 <strong>Frontend:</strong> HTML5, CSS3 with Modern Design</li>
-                    <li>💾 <strong>Database:</strong> SQLite for Prediction History</li>
-                    <li>🤖 <strong>ML Model:</strong> Random Forest Classifier with scikit-learn</li>
-                    <li>📊 <strong>Data Processing:</strong> Pandas & NumPy</li>
-                </ul>
-
-                <h2 style="color: #ec4899; margin: 25px 0 15px 0;">📈 Key Features</h2>
-                <ul style="margin-left: 20px;">
-                    <li>✅ Real-time fraud detection with 92.4% accuracy</li>
-                    <li>✅ Batch processing of CSV files with multiple transactions</li>
-                    <li>✅ Prediction history and analytics tracking</li>
-                    <li>✅ Confidence scoring for each prediction</li>
-                    <li>✅ User-friendly, modern interface</li>
-                    <li>✅ Secure data handling and processing</li>
-                </ul>
-
-                <h2 style="color: #ec4899; margin: 25px 0 15px 0;">🔐 Security & Privacy</h2>
-                <p>
-                    All data is processed securely and deleted after analysis. 
-                    We follow industry best practices for data protection and privacy.
-                </p>
-
-                <h2 style="color: #ec4899; margin: 25px 0 15px 0;">📧 Contact & Support</h2>
-                <p>
-                    For questions or feedback, please reach out to our support team. 
-                    We're committed to improving fraud detection for everyone.
-                </p>
-
-                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(236,72,153,0.2); text-align: center; color: #a0aec0;">
-                    <p>© 2024 FRAUDEX. All rights reserved.</p>
+            <div class="cards">
+                <div class="card card-large">
+                    <h3>Project Description</h3>
+                    <p>FRAUDEX is a credit card fraud detection system built for secure, reliable analysis of transaction datasets using a Random Forest machine learning model.</p>
+                    <p>Users register, log in, upload CSVs with transaction features, and review predictions along with analytics over time.</p>
+                </div>
+                <div class="card card-large">
+                    <h3>Technology Stack</h3>
+                    <ul class="feature-list">
+                        <li>Flask</li>
+                        <li>Python</li>
+                        <li>SQLite</li>
+                        <li>Pandas</li>
+                        <li>Scikit-Learn</li>
+                        <li>Random Forest</li>
+                        <li>HTML/CSS/JavaScript</li>
+                    </ul>
                 </div>
             </div>
 
-            <div style="margin-top: 30px; text-align: center;">
-                <a href="/" class="btn-primary">← Back to Home</a>
+            <div class="cards">
+                <div class="chart-card">
+                    <h3>Project Workflow</h3>
+                    <div class="workflow-box">
+                        <p>CSV Upload → Model Prediction → Fraud Detection → Analytics → Database Storage</p>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>Why FRAUDEX</h3>
+                    <p>FRAUDEX is designed for internship demonstrations and presentations with a polished cybersecurity theme, secure authentication, and user-specific history.</p>
+                </div>
+            </div>
+
+            <div class="button-row" style="justify-content:center; margin-top: 24px;">
+                <a href="/" class="btn-primary">Back to Dashboard</a>
             </div>
         </div>
+        <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
     </main>
 </body>
 </html>

@@ -9,27 +9,40 @@
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
             <li><a href="/" class="active">🏠 Home</a></li>
-            <li><a href="/upload">📤 Predict Transaction</a></li>
+            <li><a href="/upload">📤 Predict</a></li>
             <li><a href="/history">📋 History</a></li>
-            <li><a href="/about">ℹ️ About Us</a></li>
+            <li><a href="/analysis">📊 Analysis</a></li>
+            <li><a href="/about">ℹ️ About</a></li>
         </ul>
+        <div class="sidebar-footer">
+            <a href="/logout" class="sidebar-link">Logout</a>
+        </div>
     </aside>
 
     <main class="main-content">
-        <div class="dashboard-header">
-            <h2>Overview</h2>
-            <div class="header-actions">
-                <div class="badge">Live</div>
-                <a href="/upload" class="btn-primary">Predict Now</a>
+        <div class="page-header">
+            <div class="page-info">
+                <h1>Welcome back, {{ session['username'] }}</h1>
+                <p>Monitor transaction risk, review past alerts, and keep your system protected.</p>
+            </div>
+            <div class="page-actions">
+                <div class="profile-card">
+                    <div class="profile-icon">👤</div>
+                    <div><strong>{{ session['username'] }}</strong><span>Signed in</span></div>
+                </div>
+                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
             </div>
         </div>
 
-        <div class="dashboard-header">
-            <h2>Analytics Dashboard</h2>
-            <div class="header-actions">
-                <div class="badge">Insights</div>
-                <a href="/history" class="btn-secondary">View History</a>
-            </div>
+        <div class="hero-cards">
+            <a href="/upload" class="hero-card hero-primary">
+                <h3>Predict Transactions</h3>
+                <p>Upload CSV and predict fraud with AI-powered analysis.</p>
+            </a>
+            <a href="/history" class="hero-card hero-secondary">
+                <h3>View Prediction History</h3>
+                <p>Review previous predictions and fraud summaries.</p>
+            </a>
         </div>
 
         <div class="stats">
@@ -70,87 +83,17 @@
             </div>
         </div>
 
-        <div class="cards">
-            <a href="/upload" class="card">
-                <h3>🎯 Detect Transaction</h3>
-                <p>Upload transaction data and predict fraud instantly with AI-powered analysis.</p>
-            </a>
-            <a href="/history" class="card">
-                <h3>📈 Prediction History</h3>
-                <p>View all uploaded files and detailed prediction records with accuracy metrics.</p>
-            </a>
-            <a href="/about" class="card">
-                <h3>🔬 About Project</h3>
-                <p>Learn about our advanced ML model, technology stack, and security measures.</p>
-            </a>
-        </div>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="{{ url_for('static', filename='js/chart-helper.js') }}"></script>
         <script>
             const labels = {{ chart_labels|tojson }};
             const fraudValues = {{ fraud_values|tojson }};
             const volumeValues = {{ volume_values|tojson }};
 
-            const ctx1 = document.getElementById('fraudTrendChart');
-            if (ctx1) {
-                new Chart(ctx1, {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: 'Fraud Cases',
-                            data: fraudValues,
-                            borderColor: '#ec4899',
-                            backgroundColor: 'rgba(236,72,153,0.3)',
-                            tension: 0.4,
-                            fill: true,
-                            pointRadius: 4,
-                            pointBackgroundColor: '#ec4899',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            x: { ticks: { color: '#cbd5e1' } },
-                            y: { ticks: { color: '#cbd5e1' }, beginAtZero: true }
-                        }
-                    }
-                });
-            }
-
-            const ctx2 = document.getElementById('volumeChart');
-            if (ctx2) {
-                new Chart(ctx2, {
-                    type: 'bar',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label: 'Transactions',
-                            data: volumeValues,
-                            backgroundColor: 'rgba(168,85,247,0.65)',
-                            borderColor: '#a855f7',
-                            borderWidth: 1,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        },
-                        scales: {
-                            x: { ticks: { color: '#cbd5e1' } },
-                            y: { ticks: { color: '#cbd5e1' }, beginAtZero: true }
-                        }
-                    }
-                });
-            }
+            createLineChart('fraudTrendChart', labels, fraudValues, 'Fraud Cases', '#ec4899');
+            createBarChart('volumeChart', labels, volumeValues, 'Transactions', '#2563eb');
         </script>
+        <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
     </main>
 </body>
 </html>

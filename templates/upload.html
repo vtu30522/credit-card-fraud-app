@@ -9,28 +9,44 @@
         <h1><span class="logo-icon">⚡</span> FRAUDEX</h1>
         <ul class="sidebar-menu">
             <li><a href="/">🏠 Home</a></li>
-            <li><a href="/upload" class="active">📤 Predict Transaction</a></li>
+            <li><a href="/upload" class="active">📤 Predict</a></li>
             <li><a href="/history">📋 History</a></li>
-            <li><a href="/about">ℹ️ About Us</a></li>
+            <li><a href="/analysis">📊 Analysis</a></li>
+            <li><a href="/about">ℹ️ About</a></li>
         </ul>
+        <div class="sidebar-footer">
+            <a href="/logout" class="sidebar-link">Logout</a>
+        </div>
     </aside>
 
     <main class="main-content">
+        <div class="page-header">
+            <div class="page-info">
+                <h1>Upload transaction datasets for fraud detection</h1>
+                <p>Use the Random Forest model to identify fraudulent transaction records in your CSV file.</p>
+            </div>
+            <div class="page-actions">
+                <div class="profile-card">
+                    <div class="profile-icon">👤</div>
+                    <div><strong>{{ session['username'] }}</strong><span>Signed in</span></div>
+                </div>
+                <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+            </div>
+        </div>
+
         <div class="container">
             <div class="dashboard-header">
-                <h2>Predict Transactions</h2>
+                <h2>Upload & Predict</h2>
                 <div class="header-actions">
-                    <div class="badge">Batch</div>
+                    <div class="badge">Secure</div>
                     <a href="/history" class="btn-secondary">History</a>
                 </div>
             </div>
 
-            <h1>🚀 Detect Transaction Fraud</h1>
-
             <div class="cards">
-                <div class="card">
-                    <h3>📁 Prediction Panel</h3>
-                    <p class="card">Upload a CSV with transaction features matching the model and run predictions.</p>
+                <div class="card card-large">
+                    <h3>Upload CSV File</h3>
+                    <p>Required columns: Time, V1…V28, Amount.</p>
                     <form action="/predict" method="POST" enctype="multipart/form-data">
                         <label for="file">Select CSV File</label>
                         <input type="file" id="file" name="file" accept=".csv" required>
@@ -38,25 +54,18 @@
                     </form>
                 </div>
 
-                <div class="card">
-                    <h3>📊 Result Preview</h3>
-                    <div class="result-box">
-                        <h2>No Prediction Yet</h2>
-                        <p style="color:#cbd5e1;">Upload a file to see average and max fraud confidence here.</p>
-                        <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;">
-                            <div style="text-align:center;">
-                                <div class="stat-number">-</div>
-                                <div class="stat-label">Avg Confidence</div>
-                            </div>
-                            <div style="text-align:center;">
-                                <div class="stat-number">-</div>
-                                <div class="stat-label">Max Confidence</div>
-                            </div>
-                        </div>
+                <div class="card card-large">
+                    <h3>Prediction Guidance</h3>
+                    <p>Keep your upload ready with transaction data matching the model feature set. The system validates your file before prediction.</p>
+                    <div class="feature-list">
+                        <p>✅ Required columns validated automatically</p>
+                        <p>✅ Secure upload and model inference</p>
+                        <p>✅ Results saved to your history</p>
                     </div>
                 </div>
             </div>
         </div>
+        <script src="{{ url_for('static', filename='js/ui.js') }}"></script>
     </main>
 </body>
 </html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FRAUDEX - Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page fade-in">
+    <main class="main-content">
+        <div class="auth-wrapper">
+            <section class="auth-card">
+                <div class="auth-header">
+                    <span class="auth-badge">Premium Access</span>
+                    <h1>Create your FRAUDEX account</h1>
+                    <p>Create secure login access to track fraud predictions, upload transaction files, and review analytics anytime.</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="alerts">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <form class="auth-form" action="{{ url_for('register') }}" method="POST">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" name="username" id="username" placeholder="Choose a username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="email" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" placeholder="Create a password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" name="confirm_password" id="confirm_password" placeholder="Repeat your password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Create Account</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Already registered? <a href="{{ url_for('login') }}">Sign in</a></p>
+                </div>
+            </section>
+
+            <aside class="auth-panel">
+                <h2>What you get</h2>
+                <p>Instant fraud insights, secure password hashing, and a private history dashboard for every upload.</p>
+                <div class="auth-feature">
+                    <span class="auth-feature-icon">🛡️</span>
+                    <div>
+                        <strong>Strong security</strong>
+                        <p>Password hashing with Werkzeug keeps your credentials safe.</p>
+                    </div>
+                </div>
+                <div class="auth-feature">
+                    <span class="auth-feature-icon">📊</span>
+                    <div>
+                        <strong>Data intelligence</strong>
+                        <p>Track fraud predictions, transaction volume, and overall risk at a glance.</p>
+                    </div>
+                </div>
+                <div class="auth-feature">
+                    <span class="auth-feature-icon">⚙️</span>
+                    <div>
+                        <strong>Fast onboarding</strong>
+                        <p>Sign up quickly and start predicting with your first CSV upload.</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>
