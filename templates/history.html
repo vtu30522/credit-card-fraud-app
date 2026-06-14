@@ -52,6 +52,22 @@
             {% endif %}
             {% endwith %}
 
+            {% if selected_record %}
+            <div class="card" style="margin-bottom: 24px;">
+                <h3>Selected Record Details</h3>
+                <p>Filename: <strong>{{ selected_record['filename'] }}</strong></p>
+                <p>Total transactions: <strong>{{ selected_record['total_transactions'] }}</strong></p>
+                <p>Fraud count: <strong>{{ selected_record['fraud_count'] }}</strong></p>
+                <p>Normal count: <strong>{{ selected_record['normal_count'] }}</strong></p>
+                <p>Fraud percentage: <strong>{{ selected_record['fraud_percentage'] }}%</strong></p>
+                <p>Prediction date: <strong>{{ selected_record['prediction_date'] }}</strong></p>
+                <div class="button-row" style="justify-content:flex-start; gap:14px; margin-top:18px;">
+                    <a href="/download-history-report/{{ selected_record['id'] }}" class="btn-primary">Download History Report</a>
+                    <a href="/history" class="btn-secondary">Close Details</a>
+                </div>
+            </div>
+            {% endif %}
+
             {% if records %}
             <div class="table-container">
                 <table>
@@ -78,6 +94,8 @@
                             <td>{{ row['fraud_percentage'] }}%</td>
                             <td>{{ row['prediction_date'] }}</td>
                             <td>
+                                <a href="/history/{{ row['id'] }}" class="btn-secondary" style="margin-right: 8px;">Details</a>
+                                <a href="/download-history-report/{{ row['id'] }}" class="btn-secondary">Download</a>
                                 <a href="/delete/{{ row['id'] }}" class="delete-btn">Delete</a>
                             </td>
                         </tr>

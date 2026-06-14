@@ -43,6 +43,16 @@
                 </div>
             </div>
 
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="alerts">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
             <div class="cards">
                 <div class="card card-large">
                     <h3>Upload CSV File</h3>
@@ -63,6 +73,11 @@
                         <p>✅ Results saved to your history</p>
                     </div>
                 </div>
+            </div>
+
+            <div class="button-row" style="justify-content:space-between; margin-top: 10px;">
+                <a href="/download-sample" class="btn-secondary">Download Sample CSV</a>
+                <a href="/history" class="btn-secondary">View History</a>
             </div>
         </div>
         <script src="{{ url_for('static', filename='js/ui.js') }}"></script>

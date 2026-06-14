@@ -1,11 +1,12 @@
 ﻿import os
 import functools
+import time
 from datetime import timedelta
 
 import numpy as np
 import pandas as pd
 import joblib
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
@@ -28,6 +29,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024  # 10 MB max upload size
 app.secret_key = os.environ.get("SECRET_KEY", "supersecretkey123")
 app.permanent_session_lifetime = timedelta(days=7)
 
@@ -65,6 +67,12 @@ def current_user():
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    flash("The uploaded file is too large. Please upload a CSV file under 10 MB.", "danger")
+    return redirect(url_for("upload"))
 
 
 def build_history_stats(records):
@@ -188,6 +196,10 @@ def predict():
 
     filename = secure_filename(uploaded_file.filename)
     filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    if os.path.exists(filepath):
+        base, ext = os.path.splitext(filename)
+        filename = f"{base}_{int(time.time())}{ext}"
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     uploaded_file.save(filepath)
 
     try:
@@ -264,6 +276,15 @@ def predict():
         fraud_percentage=fraud_percentage,
     )
 
+    session["last_report"] = {
+        "filename": filename,
+        "total": total,
+        "fraud": fraud_count,
+        "normal": normal_count,
+        "percentage": fraud_percentage,
+        "fraud_transactions": fraud_transactions,
+    }
+
     return render_template(
         "result.html",
         filename=filename,
@@ -273,6 +294,84 @@ def predict():
         percentage=fraud_percentage,
         fraud_transactions=fraud_transactions,
         has_fraud=bool(fraud_transactions),
+    )
+
+
+@app.route("/download-sample")
+@login_required
+def download_sample():
+    sample_file = "sample_transaction.csv"
+    sample_path = os.path.join(app.root_path, sample_file)
+    if not os.path.exists(sample_path):
+        abort(404)
+    return send_file(sample_path, as_attachment=True, download_name=sample_file)
+
+
+@app.route("/download-report")
+@login_required
+def download_report():
+    last_report = session.get("last_report")
+    if not last_report:
+        flash("No prediction report is currently available for download.", "warning")
+        return redirect(url_for("home"))
+
+    import io
+    import csv
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["Filename", last_report["filename"]])
+    writer.writerow(["Total Transactions", last_report["total"]])
+    writer.writerow(["Fraud Transactions", last_report["fraud"]])
+    writer.writerow(["Normal Transactions", last_report["normal"]])
+    writer.writerow(["Fraud Percentage", f"{last_report['percentage']}%"])
+    writer.writerow([])
+    writer.writerow(["Fraud Transaction #", "Time", "Amount", "Prediction", "Confidence"])
+    for tx in last_report["fraud_transactions"]:
+        writer.writerow([
+            tx["transaction_number"],
+            tx["time"],
+            tx["amount"],
+            tx["prediction"],
+            tx["confidence"],
+        ])
+
+    buffer.seek(0)
+    return send_file(
+        io.BytesIO(buffer.getvalue().encode("utf-8")),
+        as_attachment=True,
+        download_name=f"fraud_report_{last_report['filename']}",
+        mimetype="text/csv",
+    )
+
+
+@app.route("/download-history-report/<int:record_id>")
+@login_required
+def download_history_report(record_id):
+    user = current_user()
+    record = get_history_record_by_id(record_id, user["id"])
+    if record is None:
+        flash("History record not found.", "warning")
+        return redirect(url_for("history"))
+
+    import io
+    import csv
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(["Filename", record["filename"]])
+    writer.writerow(["Total Transactions", record["total_transactions"]])
+    writer.writerow(["Fraud Transactions", record["fraud_count"]])
+    writer.writerow(["Normal Transactions", record["normal_count"]])
+    writer.writerow(["Fraud Percentage", f"{record['fraud_percentage']}%"])
+    writer.writerow(["Prediction Date", record["prediction_date"]])
+
+    buffer.seek(0)
+    return send_file(
+        io.BytesIO(buffer.getvalue().encode("utf-8")),
+        as_attachment=True,
+        download_name=f"history_report_{record['id']}.csv",
+        mimetype="text/csv",
     )
 
 
