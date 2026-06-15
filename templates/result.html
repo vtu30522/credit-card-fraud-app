@@ -39,7 +39,7 @@
                 <h2>Result Summary</h2>
                 <div class="header-actions">
                     <a href="{{ url_for('upload') }}" class="btn-secondary">Analyze Another</a>
-                    <a href="{{ url_for('download_report') }}" class="btn-primary">Download Report</a>
+                    <a href="{{ url_for('download_report') }}" class="btn-primary">Download PDF Report</a>
                 </div>
             </div>
 
@@ -67,7 +67,7 @@
             </div>
 
             {% if has_fraud %}
-            <div class="container" style="margin-top: 20px; padding: 24px; background: rgba(20,28,55,0.9);">
+            <div class="container" style="margin-top: 20px; padding: 24px; background: rgba(20,28,55,0.9); border-radius: 8px;">
                 <h3>Fraud Transaction Details</h3>
                 <div class="table-container">
                     <table>
@@ -101,7 +101,7 @@
             </div>
             {% endif %}
 
-            <div class="button-row">
+            <div class="button-row" style="margin-top: 24px;">
                 <a href="{{ url_for('upload') }}" class="btn-primary">Upload Another CSV</a>
                 <a href="{{ url_for('history') }}" class="btn-secondary">View History</a>
             </div>

@@ -15,6 +15,9 @@
             <li><a href="{{ url_for('about') }}">ℹ️ About</a></li>
         </ul>
         <div class="sidebar-footer">
+            <button class="theme-switch-btn" onclick="toggleTheme()">
+                <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+            </button>
             <a href="{{ url_for('logout') }}" class="sidebar-link">Logout</a>
         </div>
     </aside>

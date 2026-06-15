@@ -1,6 +1,8 @@
 ﻿import os
 import functools
 import time
+import io
+import csv
 from datetime import timedelta
 
 import numpy as np
@@ -9,6 +11,12 @@ import joblib
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
+
+# Pure-Python ReportLab dependencies for styling and canvas tracking
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 from database import ensure_current_schema
 from db_operations import (
@@ -94,25 +102,21 @@ def register():
         if not username or not email or not password:
             flash("Please complete all required fields.", "danger")
             return render_template("register.html")
-
         if password != confirm_password:
             flash("Passwords do not match.", "danger")
             return render_template("register.html")
-
         if get_user_by_email(email):
             flash("That email is already registered.", "danger")
             return render_template("register.html")
 
         password_hash = generate_password_hash(password)
         user_id = create_user(username, email, password_hash)
-
         if user_id is None:
             flash("Unable to create your account. Please try again.", "danger")
             return render_template("register.html")
 
         flash("Account created successfully. Please sign in.", "success")
         return redirect(url_for("login"))
-
     return render_template("register.html")
 
 
@@ -120,11 +124,9 @@ def register():
 def login():
     if session.get("user_id"):
         return redirect(url_for("home"))
-
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-
         user = get_user_by_email(email)
 
         if user is None or not check_password_hash(user["password_hash"], password):
@@ -134,10 +136,8 @@ def login():
         session.permanent = True
         session["user_id"] = user["id"]
         session["username"] = user["username"]
-
         flash(f"Welcome back, {user['username']}!", "success")
         return redirect(url_for("home"))
-
     return render_template("login.html")
 
 
@@ -153,10 +153,8 @@ def logout():
 def home():
     user = current_user()
     records = get_history_for_user(user["id"])
-
     total_files = len(records)
     total_transactions, total_fraud, total_normal, fraud_rate = build_history_stats(records)
-
     recent = records[:7]
     chart_labels = [row["prediction_date"].split(" ")[0] for row in recent]
     fraud_values = [row["fraud_count"] for row in recent]
@@ -189,7 +187,6 @@ def predict():
     if uploaded_file is None or uploaded_file.filename == "":
         flash("Please choose a CSV file to upload.", "danger")
         return redirect(url_for("upload"))
-
     if not allowed_file(uploaded_file.filename):
         flash("Only CSV files are supported.", "danger")
         return redirect(url_for("upload"))
@@ -200,15 +197,13 @@ def predict():
         base, ext = os.path.splitext(filename)
         filename = f"{base}_{int(time.time())}{ext}"
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    
     uploaded_file.save(filepath)
 
     try:
         df = pd.read_csv(filepath)
     except Exception:
-        flash(
-            "Unable to read the uploaded CSV file. Please verify the file format.",
-            "danger",
-        )
+        flash("Unable to read the uploaded CSV file. Please verify the file format.", "danger")
         return redirect(url_for("upload"))
 
     if df.empty:
@@ -217,22 +212,14 @@ def predict():
 
     missing_columns = [col for col in REQUIRED_COLUMNS if col not in df.columns]
     if missing_columns:
-        flash(
-            "CSV is missing required columns: {}".format(
-                ", ".join(missing_columns)
-            ),
-            "danger",
-        )
+        flash("CSV is missing required columns: {}".format(", ".join(missing_columns)), "danger")
         return redirect(url_for("upload"))
 
     try:
         df = df[REQUIRED_COLUMNS]
         predictions = np.asarray(model.predict(df))
     except Exception:
-        flash(
-            "Unable to process the uploaded CSV. Verify the file contains the required transaction features.",
-            "danger",
-        )
+        flash("Unable to process the uploaded CSV. Verify the file contains the required transaction features.", "danger")
         return redirect(url_for("upload"))
 
     try:
@@ -244,27 +231,22 @@ def predict():
     fraud_count = int(np.sum(predictions == 1))
     normal_count = total - fraud_count
     fraud_percentage = round((fraud_count / total) * 100, 2) if total else 0
-
+    
     fraud_transactions = []
     if fraud_count:
         fraud_rows = df[predictions == 1]
         for row_index, row in fraud_rows.iterrows():
             confidence = (
                 f"{round(float(probabilities[row_index]) * 100, 2)}%"
-                if probabilities is not None
-                else "N/A"
+                if probabilities is not None else "N/A"
             )
-            fraud_transactions.append(
-                {
-                    "transaction_number": int(row_index) + 1
-                    if isinstance(row_index, int)
-                    else row_index,
-                    "time": row["Time"],
-                    "amount": row["Amount"],
-                    "prediction": "Fraud",
-                    "confidence": confidence,
-                }
-            )
+            fraud_transactions.append({
+                "transaction_number": int(row_index) + 1 if isinstance(row_index, int) else row_index,
+                "time": row["Time"],
+                "amount": row["Amount"],
+                "prediction": "Fraud",
+                "confidence": confidence,
+            })
 
     user = current_user()
     save_prediction_history(
@@ -315,33 +297,169 @@ def download_report():
         flash("No prediction report is currently available for download.", "warning")
         return redirect(url_for("home"))
 
-    import io
-    import csv
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40
+    )
+    
+    styles = getSampleStyleSheet()
+    
+    # Custom Type Alignment Specifications
+    title_style = ParagraphStyle(
+        'DocTitle',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=24,
+        leading=28,
+        textColor=colors.HexColor('#0f172a'),
+        spaceAfter=4
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'DocSubtitle',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=10,
+        leading=14,
+        textColor=colors.HexColor('#64748b'),
+        spaceAfter=15
+    )
+    
+    section_heading = ParagraphStyle(
+        'SectionHeading',
+        parent=styles['Heading2'],
+        fontName='Helvetica-Bold',
+        fontSize=14,
+        leading=18,
+        textColor=colors.HexColor('#1e293b'),
+        spaceBefore=15,
+        spaceAfter=10
+    )
+    
+    cell_text = ParagraphStyle(
+        'CellText',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9.5,
+        leading=13,
+        textColor=colors.HexColor('#334155')
+    )
+    
+    cell_header = ParagraphStyle(
+        'CellHeader',
+        parent=styles['Normal'],
+        fontName='Helvetica-Bold',
+        fontSize=9.5,
+        leading=13,
+        textColor=colors.HexColor('#1e293b')
+    )
 
-    buffer = io.StringIO()
-    writer = csv.writer(buffer)
-    writer.writerow(["Filename", last_report["filename"]])
-    writer.writerow(["Total Transactions", last_report["total"]])
-    writer.writerow(["Fraud Transactions", last_report["fraud"]])
-    writer.writerow(["Normal Transactions", last_report["normal"]])
-    writer.writerow(["Fraud Percentage", f"{last_report['percentage']}%"])
-    writer.writerow([])
-    writer.writerow(["Fraud Transaction #", "Time", "Amount", "Prediction", "Confidence"])
-    for tx in last_report["fraud_transactions"]:
-        writer.writerow([
-            tx["transaction_number"],
-            tx["time"],
-            tx["amount"],
-            tx["prediction"],
-            tx["confidence"],
-        ])
+    story = []
+    
+    # Header Elements
+    story.append(Paragraph("Transaction Risk Analysis Report", title_style))
+    story.append(Paragraph(f"Dataset Target: {last_report['filename']}", subtitle_style))
+    story.append(Spacer(1, 10))
+    
+    # Executive Metrics Performance Summary Cards Matrix Configuration
+    metrics_data = [
+        [
+            Paragraph("<b>{}</b><br/><font color='#64748b'>TOTAL CASE LOGS</font>".format(last_report['total']), cell_text),
+            Paragraph("<b><font color='#ef4444'>{}</font></b><br/><font color='#64748b'>FRAUD FLAGGED</font>".format(last_report['fraud']), cell_text),
+            Paragraph("<b><font color='#10b981'>{}</font></b><br/><font color='#64748b'>NORMAL SAFE</font>".format(last_report['normal']), cell_text),
+            Paragraph("<b>{}%</b><br/><font color='#64748b'>RISK DENSITY</font>".format(last_report['percentage']), cell_text)
+        ]
+    ]
+    
+    metrics_table = Table(metrics_data, colWidths=[130, 130, 130, 130])
+    metrics_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8fafc')),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
+        ('PADDING', (0, 0), (-1, -1), 12),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0'))
+    ]))
+    story.append(metrics_table)
+    story.append(Spacer(1, 20))
+    
+    # Audit Breakdown Listing Engine Routing
+    story.append(Paragraph("Identified Threat Anomalies", section_heading))
+    
+    if last_report['fraud_transactions']:
+        table_content = [[
+            Paragraph("Tx ID", cell_header),
+            Paragraph("Time Offset", cell_header),
+            Paragraph("Amount Value", cell_header),
+            Paragraph("System Verdict", cell_header),
+            Paragraph("Confidence Vector", cell_header)
+        ]]
+        
+        for tx in last_report['fraud_transactions']:
+            table_content.append([
+                Paragraph(f"#{tx['transaction_number']}", cell_text),
+                Paragraph(f"{tx['time']}s", cell_text),
+                Paragraph(f"${float(tx['amount']):.2f}", cell_text),
+                Paragraph("<font color='#ef4444'><b>CRITICAL</b></font>", cell_text),
+                Paragraph(tx['confidence'], cell_text)
+            ])
+            
+        data_table = Table(table_content, colWidths=[80, 100, 110, 110, 120])
+        
+        # Build Alternating Zebra Dynamic Background Row Style Indices Matrix
+        t_style = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f5f9')),
+            ('PADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('TOPPADDING', (0, 0), (-1, 0), 10),
+            ('LINEBELOW', (0, 0), (-1, 0), 1.5, colors.HexColor('#cbd5e1')),
+            ('LINEBELOW', (0, 1), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]
+        for i in range(1, len(table_content)):
+            if i % 2 == 0:
+                t_style.append(('BACKGROUND', (0, i), (-1, i), colors.HexColor('#f8fafc')))
+                
+        data_table.setStyle(TableStyle(t_style))
+        story.append(data_table)
+    else:
+        clean_style = ParagraphStyle(
+            'CleanStyle',
+            parent=styles['Normal'],
+            fontName='Helvetica',
+            fontSize=10,
+            textColor=colors.HexColor('#166534'),
+            alignment=1
+        )
+        clean_content = [[Paragraph("<b>System Scan Secure:</b> No target fraudulent vector sequences matching risk indexes identified in this transaction trace.", clean_style)]]
+        clean_table = Table(clean_content, colWidths=[520])
+        clean_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f0fdf4')),
+            ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#bbf7d0')),
+            ('PADDING', (0, 0), (-1, -1), 16)
+        ]))
+        story.append(clean_table)
 
+    # Compile structure to binary buffer output
+    def add_footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.setFillColor(colors.HexColor('#64748b'))
+        canvas.drawString(40, 30, "FRAUDEX Network Integrity Management Suite")
+        canvas.drawRightString(doc.pagesize[0] - 40, 30, f"Page {doc.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=add_footer, onLaterPages=add_footer)
     buffer.seek(0)
+    
     return send_file(
-        io.BytesIO(buffer.getvalue().encode("utf-8")),
+        buffer,
         as_attachment=True,
-        download_name=f"fraud_report_{last_report['filename']}",
-        mimetype="text/csv",
+        download_name=f"fraud_report_{last_report['filename']}.pdf",
+        mimetype="application/pdf"
     )
 
 
@@ -354,24 +472,86 @@ def download_history_report(record_id):
         flash("History record not found.", "warning")
         return redirect(url_for("history"))
 
-    import io
-    import csv
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=40, leftMargin=40, topMargin=40, bottomMargin=40
+    )
+    
+    styles = getSampleStyleSheet()
+    
+    title_style = ParagraphStyle(
+        'HistTitle',
+        parent=styles['Heading1'],
+        fontName='Helvetica-Bold',
+        fontSize=22,
+        leading=26,
+        textColor=colors.HexColor('#0f172a'),
+        spaceAfter=4
+    )
+    
+    subtitle_style = ParagraphStyle(
+        'HistSubtitle',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=9.5,
+        leading=13,
+        textColor=colors.HexColor('#64748b'),
+        spaceAfter=20
+    )
+    
+    cell_text = ParagraphStyle(
+        'HistCellText',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=10,
+        leading=14,
+        textColor=colors.HexColor('#334155'),
+        alignment=1
+    )
 
-    buffer = io.StringIO()
-    writer = csv.writer(buffer)
-    writer.writerow(["Filename", record["filename"]])
-    writer.writerow(["Total Transactions", record["total_transactions"]])
-    writer.writerow(["Fraud Transactions", record["fraud_count"]])
-    writer.writerow(["Normal Transactions", record["normal_count"]])
-    writer.writerow(["Fraud Percentage", f"{record['fraud_percentage']}%"])
-    writer.writerow(["Prediction Date", record["prediction_date"]])
+    story = []
+    story.append(Paragraph("Archived Scan Summary Log", title_style))
+    story.append(Paragraph(f"Record Identifier Reference: #{record['id']}  |  Processed On: {record['prediction_date']}", subtitle_style))
+    story.append(Paragraph(f"<b>Dataset Target Filename:</b> {record['filename']}", ParagraphStyle('FN', parent=styles['Normal'], fontSize=10, spaceAfter=15)))
+    
+    metrics_data = [
+        [
+            Paragraph("<b>{}</b><br/><font color='#64748b'>TOTAL</font>".format(record['total_transactions']), cell_text),
+            Paragraph("<b><font color='#ef4444'>{}</font></b><br/><font color='#64748b'>FRAUD</font>".format(record['fraud_count']), cell_text),
+            Paragraph("<b><font color='#10b981'>{}</font></b><br/><font color='#64748b'>NORMAL</font>".format(record['normal_count']), cell_text),
+            Paragraph("<b>{}%</b><br/><font color='#64748b'>RISK RATE</font>".format(record['fraud_percentage']), cell_text)
+        ]
+    ]
+    
+    metrics_table = Table(metrics_data, colWidths=[130, 130, 130, 130])
+    metrics_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8fafc')),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('PADDING', (0, 0), (-1, -1), 14),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
+        ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0'))
+    ]))
+    story.append(metrics_table)
 
+    def add_footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.setFillColor(colors.HexColor('#64748b'))
+        canvas.drawString(40, 30, "FRAUDEX Archived Security Database Logs Summary")
+        canvas.drawRightString(doc.pagesize[0] - 40, 30, f"Page {doc.page}")
+        canvas.restoreState()
+
+    doc.build(story, onFirstPage=add_footer, onLaterPages=add_footer)
     buffer.seek(0)
+    
     return send_file(
-        io.BytesIO(buffer.getvalue().encode("utf-8")),
+        buffer,
         as_attachment=True,
-        download_name=f"history_report_{record['id']}.csv",
-        mimetype="text/csv",
+        download_name=f"history_report_{record['id']}.pdf",
+        mimetype="application/pdf"
     )
 
 
@@ -382,7 +562,6 @@ def history(record_id):
     user = current_user()
     records = get_history_for_user(user["id"])
     selected_record = None
-
     if record_id is not None:
         selected_record = get_history_record_by_id(record_id, user["id"])
         if selected_record is None:
@@ -401,12 +580,10 @@ def history(record_id):
 def delete(record_id):
     user = current_user()
     deleted = delete_history_record(record_id, user["id"])
-
     if deleted:
         flash("Prediction record deleted successfully.", "success")
     else:
         flash("Unable to remove that record.", "danger")
-
     return redirect(url_for("history"))
 
 
@@ -415,9 +592,9 @@ def delete(record_id):
 def analysis():
     user = current_user()
     records = get_history_for_user(user["id"])
-
     total_files = len(records)
     total_transactions, total_fraud, total_normal, fraud_rate = build_history_stats(records)
+    
     average_fraud_rate = round(
         sum(record["fraud_percentage"] for record in records) / total_files, 2
     ) if total_files else 0

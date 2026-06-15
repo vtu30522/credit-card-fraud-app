@@ -15,6 +15,9 @@
             <li><a href="{{ url_for('about') }}" class="active">ℹ️ About</a></li>
         </ul>
         <div class="sidebar-footer">
+            <button class="theme-switch-btn" onclick="toggleTheme()">
+                <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+            </button>
             <a href="{{ url_for('logout') }}" class="sidebar-link">Logout</a>
         </div>
     </aside>
@@ -40,18 +43,6 @@
                     <h3>Project Description</h3>
                     <p>FRAUDEX is a credit card fraud detection system built for secure, reliable analysis of transaction datasets using a Random Forest machine learning model.</p>
                     <p>Users register, log in, upload CSVs with transaction features, and review predictions along with analytics over time.</p>
-                </div>
-                <div class="card card-large">
-                    <h3>Technology Stack</h3>
-                    <ul class="feature-list">
-                        <li>Flask</li>
-                        <li>Python</li>
-                        <li>SQLite</li>
-                        <li>Pandas</li>
-                        <li>Scikit-Learn</li>
-                        <li>Random Forest</li>
-                        <li>HTML/CSS/JavaScript</li>
-                    </ul>
                 </div>
             </div>
 
