@@ -55,22 +55,24 @@ except Exception as exc:
     ) from exc
 
 
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if "user_id" not in session:
-            flash("Please sign in to continue.", "warning")
-            return redirect(url_for("login"))
-        return view(**kwargs)
-
-    return wrapped_view
-
-
 def current_user():
     user_id = session.get("user_id")
     if not user_id:
         return None
     return get_user_by_id(user_id)
+
+
+# FIXED: Validates both session presence AND database existence to prevent NoneType 500 crashes
+def login_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if "user_id" not in session or current_user() is None:
+            session.clear()  # Wipes stale cookies cleanly if the DB dropped your user row
+            flash("Please sign in to continue.", "warning")
+            return redirect(url_for("login"))
+        return view(**kwargs)
+
+    return wrapped_view
 
 
 def allowed_file(filename):
@@ -122,7 +124,7 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if session.get("user_id"):
+    if session.get("user_id") and current_user() is not None:
         return redirect(url_for("home"))
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
@@ -306,7 +308,6 @@ def download_report():
     
     styles = getSampleStyleSheet()
     
-    # Custom Type Alignment Specifications
     title_style = ParagraphStyle(
         'DocTitle',
         parent=styles['Heading1'],
@@ -344,7 +345,8 @@ def download_report():
         fontName='Helvetica',
         fontSize=9.5,
         leading=13,
-        textColor=colors.HexColor('#334155')
+        textColor=colors.HexColor('#334155'),
+        alignment=1
     )
     
     cell_header = ParagraphStyle(
@@ -357,16 +359,13 @@ def download_report():
     )
 
     story = []
-    
-    # Header Elements
     story.append(Paragraph("Transaction Risk Analysis Report", title_style))
     story.append(Paragraph(f"Dataset Target: {last_report['filename']}", subtitle_style))
     story.append(Spacer(1, 10))
     
-    # Executive Metrics Performance Summary Cards Matrix Configuration
     metrics_data = [
         [
-            Paragraph("<b>{}</b><br/><font color='#64748b'>TOTAL CASE LOGS</font>".format(last_report['total']), cell_text),
+            Paragraph("<b>{}</b><br/><font color='#64748b'>TOTAL LOGS</font>".format(last_report['total']), cell_text),
             Paragraph("<b><font color='#ef4444'>{}</font></b><br/><font color='#64748b'>FRAUD FLAGGED</font>".format(last_report['fraud']), cell_text),
             Paragraph("<b><font color='#10b981'>{}</font></b><br/><font color='#64748b'>NORMAL SAFE</font>".format(last_report['normal']), cell_text),
             Paragraph("<b>{}%</b><br/><font color='#64748b'>RISK DENSITY</font>".format(last_report['percentage']), cell_text)
@@ -378,7 +377,6 @@ def download_report():
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#f8fafc')),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
         ('PADDING', (0, 0), (-1, -1), 12),
         ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0'))
@@ -386,7 +384,6 @@ def download_report():
     story.append(metrics_table)
     story.append(Spacer(1, 20))
     
-    # Audit Breakdown Listing Engine Routing
     story.append(Paragraph("Identified Threat Anomalies", section_heading))
     
     if last_report['fraud_transactions']:
@@ -408,8 +405,6 @@ def download_report():
             ])
             
         data_table = Table(table_content, colWidths=[80, 100, 110, 110, 120])
-        
-        # Build Alternating Zebra Dynamic Background Row Style Indices Matrix
         t_style = [
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f5f9')),
             ('PADDING', (0, 0), (-1, -1), 8),
@@ -443,7 +438,6 @@ def download_report():
         ]))
         story.append(clean_table)
 
-    # Compile structure to binary buffer output
     def add_footer(canvas, doc):
         canvas.saveState()
         canvas.setFont('Helvetica', 8)
@@ -514,6 +508,7 @@ def download_history_report(record_id):
     story = []
     story.append(Paragraph("Archived Scan Summary Log", title_style))
     story.append(Paragraph(f"Record Identifier Reference: #{record['id']}  |  Processed On: {record['prediction_date']}", subtitle_style))
+    story.append(Spacer(1, 10))
     story.append(Paragraph(f"<b>Dataset Target Filename:</b> {record['filename']}", ParagraphStyle('FN', parent=styles['Normal'], fontSize=10, spaceAfter=15)))
     
     metrics_data = [
